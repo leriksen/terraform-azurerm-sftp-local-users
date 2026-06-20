@@ -1,4 +1,4 @@
-  locals {
+locals {
   users_by_sequence = { for u in var.sftp_users : u.sequence_number => u }
 }
 
@@ -31,6 +31,20 @@ resource "azurerm_storage_account_local_user" "this" {
     content {
       key         = ssh_authorized_key.value.key
       description = ssh_authorized_key.value.description
+    }
+  }
+}
+
+# allowAclAuthorization is not exposed by the azurerm provider — patch via azapi.
+resource "azapi_update_resource" "acl_auth" {
+  for_each = { for k, u in local.users_by_sequence : k => u if u.allow_acl_authorization }
+
+  type        = "Microsoft.Storage/storageAccounts/localUsers@2023-05-01"
+  resource_id = azurerm_storage_account_local_user.this[each.key].id
+
+  body = {
+    properties = {
+      allowAclAuthorization = true
     }
   }
 }
