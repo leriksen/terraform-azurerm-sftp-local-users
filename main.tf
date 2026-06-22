@@ -5,10 +5,11 @@ locals {
 resource "azurerm_storage_account_local_user" "this" {
   for_each = local.users_by_sequence
 
-  name               = "sftpuser${each.key}"
-  storage_account_id = var.storage_account_id
-  home_directory     = each.value.home_directory
-  ssh_key_enabled    = each.value.ssh_key_enabled
+  name                 = "sftpuser${each.key}"
+  storage_account_id   = var.storage_account_id
+  home_directory       = each.value.home_directory
+  ssh_key_enabled      = each.value.ssh_key_enabled
+  ssh_password_enabled = false
 
   dynamic "permission_scope" {
     for_each = each.value.permission_scopes
