@@ -38,14 +38,14 @@ resource "azurerm_storage_account_local_user" "this" {
 
 # allowAclAuthorization is not exposed by the azurerm provider — patch via azapi.
 resource "azapi_update_resource" "acl_auth" {
-  for_each = { for k, u in local.users_by_sequence : k => u if u.allow_acl_authorization }
+  for_each = local.users_by_sequence
 
   type        = "Microsoft.Storage/storageAccounts/localUsers@2023-05-01"
   resource_id = azurerm_storage_account_local_user.this[each.key].id
 
   body = {
     properties = {
-      allowAclAuthorization = true
+      allowAclAuthorization = each.value.allow_acl_authorization
     }
   }
 }
